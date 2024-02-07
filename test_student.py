@@ -1,6 +1,7 @@
 import unittest
 from student import Student
 from datetime import timedelta
+from unittest.mock import patch #mock test for the api
 
 class TestStudent(unittest.TestCase):
 
@@ -49,6 +50,22 @@ class TestStudent(unittest.TestCase):
         self.student.apply_extension(5)
 
         self.assertEqual(self.student.end_date, old_end_date + timedelta(days=5)) #checks if the student end date is the same as the old date + 5 days, as per the test above
+
+##mocking
+    def test_course_schedule_success(self):
+        with patch("student.requests.get") as mocked_get: #use the patch, and the student file and call this function; requests.get
+            mocked_get.return_value.ok = True #tests the value returned from student.py course schedule rquests.get returns "True" when the value is okay
+            mocked_get.return_value.text = "Success" #tests the same but text is "Success"
+
+            schedule = self.student.course_schedule()
+            self.assertEqual(schedule, "Success")
+
+    def test_course_schedule_failed(self):
+        with patch("student.requests.get") as mocked_get: 
+            mocked_get.return_value.ok = False
+
+            schedule = self.student.course_schedule()
+            self.assertEqual(schedule, "Something went wrong with the request!")
 
 
 if __name__ == '__main__':
